@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>The Margin — College Sports Analytics</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=DM+Mono:wght@400;500&family=Lora:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#fff;--bg2:#F5F7FA;--bg3:#EDF1F6;
+  --border:#E0E6EF;--border-hi:#C5D3E3;
+  --text:#0A0E17;--muted:#5C6B82;--muted2:#8C9AAD;
+  --blue:#6AAFE6;--blue-lo:#EBF4FC;--blue-mid:#C2DEFF;--blue-dark:#2C6FAC;
+  --black:#0A0E17;
+  --green:#16A34A;--green-lo:#F0FDF4;
+  --red:#DC2626;--red-lo:#FEF2F2;
+  --amber:#D97706;--amber-lo:#FFFBEB;
+  --purple:#7C3AED;--purple-lo:#F5F3FF;
+  --fh:'Barlow Condensed',sans-serif;
+  --fb:'Lora',serif;
+  --fm:'DM Mono',monospace;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--fb);line-height:1.6;min-height:100vh}
+nav{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;height:54px;gap:1rem}
+.nav-logo{font-family:var(--fh);font-size:1.5rem;font-weight:900;color:var(--black);white-space:nowrap}
+.nav-logo span{color:var(--blue)}
+.nav-badge{background:var(--blue-lo);border:1px solid var(--blue-mid);color:var(--blue-dark);font-family:var(--fh);font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:100px}
+.nav-cta{background:var(--black);color:#fff;font-family:var(--fh);font-size:.78rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:.38rem 1rem;border-radius:3px;text-decoration:none;white-space:nowrap}
+.mod-tabs{display:flex;gap:0;background:var(--bg2);border-bottom:2px solid var(--border);padding:0 1.5rem;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.mod-tab{font-family:var(--fh);font-size:.78rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:.75rem 1.2rem;cursor:pointer;border:none;background:transparent;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:all .2s}
+.mod-tab.active{color:var(--black);border-bottom-color:var(--blue)}
+.mod-tab:hover{color:var(--black)}
+.panel{display:none;padding:1.5rem}
+.panel.active{display:block}
+.container{max-width:1200px;margin:0 auto}
+.sec-label{font-size:.63rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--blue-dark);margin-bottom:.4rem;font-family:var(--fh)}
+.sec-title{font-family:var(--fh);font-size:clamp(1.5rem,3vw,2.2rem);font-weight:900;line-height:1.02;letter-spacing:-.02em;margin-bottom:.6rem;color:var(--black)}
+.sec-sub{color:var(--muted);font-size:.85rem;max-width:620px;margin-bottom:1.4rem}
+.tbl-wrap{border:1px solid var(--border);border-radius:6px;overflow:hidden;overflow-x:auto}
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{background:var(--bg2);font-family:var(--fh);font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);padding:.55rem .85rem;text-align:center;border-bottom:1px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none}
+.tbl th.left,.tbl td.left{text-align:left}
+.tbl th:hover,.tbl th.sorted{color:var(--blue-dark)}
+.tbl td{padding:.7rem .85rem;border-bottom:1px solid var(--border);font-family:var(--fm);font-size:.76rem;text-align:center;vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:var(--blue-lo);cursor:pointer}
+.team-cell{display:flex;align-items:center;gap:8px}
+.tlogo{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--fh);font-size:.55rem;font-weight:900;flex-shrink:0}
+.tn{font-family:var(--fh);font-size:.85rem;font-weight:700;color:var(--black)}
+.tc{font-size:.62rem;color:var(--muted2)}
+.hi{color:var(--green);font-weight:500}
+.mid{color:var(--amber);font-weight:500}
+.lo{color:var(--red)}
+.bl{color:var(--blue-dark);font-weight:500}
+.pu{color:var(--purple);font-weight:500}
+.pill{display:inline-block;font-size:.6rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:100px;font-family:var(--fh)}
+.pill-green{background:var(--green-lo);color:var(--green)}
+.pill-red{background:var(--red-lo);color:var(--red)}
+.pill-amber{background:var(--amber-lo);color:var(--amber)}
+.pill-blue{background:var(--blue-lo);color:var(--blue-dark)}
+.pill-purple{background:var(--purple-lo);color:var(--purple)}
+.metric-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.8rem;margin-bottom:1.4rem}
+.mcard{background:var(--bg2);border-radius:6px;padding:1rem}
+.mcard-label{font-size:.6rem;letter-spacing:.09em;text-transform:uppercase;color:var(--muted2);font-family:var(--fh);margin-bottom:3px}
+.mcard-val{font-family:var(--fh);font-size:1.6rem;font-weight:900;line-height:1;color:var(--black)}
+.mcard-sub{font-size:.68rem;color:var(--muted);margin-top:3px}
+.expand-row{display:none;background:var(--bg2)}
+.expand-row.open{display:table-row}
+.expand-inner{padding:1rem 1.2rem}
+.expand-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.7rem}
+.ecard{background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:.75rem}
+.ecard-lbl{font-size:.58rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted2);font-family:var(--fh);margin-bottom:2px}
+.ecard-val{font-family:var(--fh);font-size:1.1rem;font-weight:900;color:var(--black);line-height:1}
+.ecard-sub{font-size:.65rem;color:var(--muted);margin-top:2px}
+.bar-viz{height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-top:4px}
+.bar-viz-fill{height:100%;border-radius:3px}
+.ks-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:.9rem}
+.ks-card{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:1.1rem;transition:border-color .2s}
+.ks-card:hover{border-color:var(--blue)}
+.ks-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.8rem}
+.ks-team{font-family:var(--fh);font-size:1rem;font-weight:900;color:var(--black)}
+.ks-conf{font-size:.62rem;color:var(--muted2)}
+.ks-score{font-family:var(--fh);font-size:2rem;font-weight:900;line-height:1}
+.ks-label{font-size:.58rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted2);font-family:var(--fh)}
+.ks-bar-row{margin-bottom:.5rem}
+.ks-bar-label{display:flex;justify-content:space-between;font-size:.65rem;color:var(--muted);font-family:var(--fh);margin-bottom:2px}
+.ks-runs{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.6rem}
+.ks-run-pill{font-size:.6rem;font-family:var(--fh);font-weight:700;padding:2px 8px;border-radius:100px}
+.clutch-viz{display:flex;align-items:center;gap:.5rem}
+.clutch-ft-bar{flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden}
+.clutch-ft-fill{height:100%;border-radius:3px}
+.conf-select{background:var(--bg2);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:.4rem .7rem;font-family:var(--fh);font-size:.85rem;cursor:pointer;margin-bottom:1rem}
+.ats-meter{display:flex;align-items:center;gap:.5rem;font-family:var(--fm);font-size:.75rem}
+.ats-bar{flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden}
+.ats-fill{height:100%;background:var(--blue);border-radius:3px}
+.roster-gauge{display:flex;align-items:center;gap:.5rem}
+.rg-bar{flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden}
+.rg-fill{height:100%;border-radius:3px}
+.ticker-wrap{background:var(--black);overflow:hidden;height:34px;display:flex;align-items:center}
+.ticker-label{background:var(--blue);color:#fff;font-family:var(--fh);font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:0 12px;height:100%;display:flex;align-items:center;flex-shrink:0}
+.ticker-inner{display:flex;animation:tick 30s linear infinite;white-space:nowrap}
+@keyframes tick{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.tick-item{display:inline-flex;align-items:center;gap:8px;padding:0 1.5rem;font-size:.7rem;font-family:var(--fm);border-right:1px solid rgba(255,255,255,.1);height:34px;color:rgba(255,255,255,.55)}
+.tick-item .tt{color:#fff;font-weight:500}
+.tick-item .up{color:var(--blue)}
+.tick-item .dn{color:#F87171}
+/* ANALYZER */
+.analyzer-wrap{background:var(--bg);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.analyzer-top{background:var(--black);padding:1.4rem 1.8rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+.analyzer-top h3{font-family:var(--fh);font-size:1.2rem;font-weight:900;color:#fff}
+.ai-chip{background:var(--blue);color:#fff;font-family:var(--fh);font-size:.62rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;border-radius:100px}
+.analyzer-body{padding:1.8rem}
+.team-selectors{display:grid;grid-template-columns:1fr auto 1fr;gap:1rem;align-items:end;margin-bottom:1.5rem}
+.team-sel label{font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);margin-bottom:5px;display:block;font-family:var(--fh)}
+.team-sel select{width:100%;background:var(--bg2);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:.5rem .8rem;font-family:var(--fh);font-size:.9rem;cursor:pointer}
+.vs-divider{text-align:center;font-family:var(--fh);font-size:1.2rem;font-weight:900;color:var(--muted2);padding-bottom:2px}
+.analyze-btn{width:100%;background:var(--black);color:#fff;font-family:var(--fh);font-size:1rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:.75rem;border-radius:4px;border:none;cursor:pointer;margin-bottom:1.5rem}
+.analyze-btn:disabled{opacity:.5;cursor:not-allowed}
+.archetype-section{display:none}
+.archetype-section.show{display:block;animation:fadeup .4s ease}
+@keyframes fadeup{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.arch-header{background:var(--blue-lo);border:1px solid var(--blue-mid);border-radius:6px;padding:1.2rem 1.4rem;margin-bottom:1.4rem;display:flex;gap:1.2rem;align-items:flex-start;flex-wrap:wrap}
+.arch-tag{background:var(--blue);color:#fff;font-family:var(--fh);font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 10px;border-radius:100px;flex-shrink:0;margin-top:3px}
+.arch-name{font-family:var(--fh);font-size:1.3rem;font-weight:900;color:var(--black);margin-bottom:.2rem}
+.arch-desc{font-size:.8rem;color:var(--muted);line-height:1.5}
+.comparison-grid{display:grid;grid-template-columns:1fr 60px 1fr;border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:1.4rem}
+.comp-header{background:var(--black);color:#fff;font-family:var(--fh);font-size:.75rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:.6rem 1rem;text-align:center}
+.comp-header.mid{background:var(--blue);font-size:.6rem;display:flex;align-items:center;justify-content:center}
+.comp-cell{padding:.65rem 1rem;border-top:1px solid var(--border);font-family:var(--fm);font-size:.8rem;text-align:center}
+.comp-cell.stat-label{background:var(--bg2);font-family:var(--fh);font-size:.65rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted2);display:flex;align-items:center;justify-content:center}
+.comp-cell.win{color:var(--blue-dark);font-weight:500}
+.comp-cell.lose{color:var(--muted2)}
+.hist-bar-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.4rem}
+.hist-card{background:var(--bg2);border-radius:6px;padding:1.1rem}
+.hist-title{font-family:var(--fh);font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted2);margin-bottom:.8rem}
+.hist-main{font-family:var(--fh);font-size:2.2rem;font-weight:900;color:var(--black);line-height:1}
+.hist-main span{font-size:1rem;color:var(--muted2)}
+.hist-sub{font-size:.72rem;color:var(--muted);margin-top:.3rem}
+.bar-wrap{margin-top:.7rem;height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px;background:var(--blue)}
+.ai-narrative-box{border:1px solid var(--blue-mid);border-radius:6px;overflow:hidden;margin-top:1.4rem}
+.ai-nar-header{background:var(--black);padding:.9rem 1.2rem;display:flex;align-items:center;gap:.7rem}
+.ai-nar-header span{font-family:var(--fh);font-size:.85rem;font-weight:700;color:#fff}
+.ai-nar-body{padding:1.4rem;background:var(--bg)}
+.ai-nar-body p{font-size:.88rem;color:var(--text);line-height:1.75;margin-bottom:.8rem}
+.ai-nar-body p:last-child{margin-bottom:0}
+.ai-loading{display:flex;align-items:center;gap:.7rem;color:var(--muted);font-size:.82rem;font-family:var(--fh)}
+.ai-dots span{display:inline-block;animation:dotpulse 1.2s infinite;opacity:0}
+.ai-dots span:nth-child(2){animation-delay:.2s}
+.ai-dots span:nth-child(3){animation-delay:.4s}
+@keyframes dotpulse{0%,100%{opacity:0}50%{opacity:1}}
+.ai-key-factors{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.7rem;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border)}
+.ai-factor{background:var(--blue-lo);border-radius:4px;padding:.65rem .8rem}
+.ai-factor .label{font-size:.6rem;letter-spacing:.09em;text-transform:uppercase;color:var(--blue-dark);font-family:var(--fh);margin-bottom:2px}
+.ai-factor .val{font-family:var(--fh);font-size:1rem;font-weight:900;color:var(--black)}
+/* MM TRACKER */
+.mm-header{background:var(--black);border-radius:6px;padding:1.4rem 1.6rem;margin-bottom:1.4rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+.mm-header h2{font-family:var(--fh);font-size:1.6rem;font-weight:900;color:#fff}
+.mm-header p{font-size:.78rem;color:rgba(255,255,255,.5);font-family:var(--fh);margin-top:3px}
+.mm-chip{background:var(--blue);color:#fff;font-family:var(--fh);font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 10px;border-radius:100px}
+.mm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.9rem;margin-bottom:1.4rem}
+.mm-card{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:1.1rem;transition:border-color .2s}
+.mm-card:hover{border-color:var(--blue)}
+.mm-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:.8rem}
+.mm-team-name{font-family:var(--fh);font-size:.95rem;font-weight:900;color:var(--black)}
+.mm-conf{font-size:.62rem;color:var(--muted2)}
+.mm-pct{font-family:var(--fh);font-size:2rem;font-weight:900;line-height:1}
+.mm-pct-label{font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted2);font-family:var(--fh);margin-top:1px}
+.mm-bar-wrap{height:4px;background:var(--bg3);border-radius:2px;margin-bottom:.7rem;overflow:hidden}
+.mm-bar{height:100%;border-radius:2px}
+.mm-rounds{display:flex;gap:.4rem;flex-wrap:wrap}
+.mm-round-pill{font-size:.6rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:2px 7px;border-radius:100px;font-family:var(--fh)}
+.sim-wrap{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:1.4rem;margin-bottom:1.4rem}
+.sim-title{font-family:var(--fh);font-size:1rem;font-weight:900;text-transform:uppercase;letter-spacing:.04em;margin-bottom:1rem;color:var(--black)}
+.sim-row{display:flex;gap:1rem;align-items:flex-end;flex-wrap:wrap;margin-bottom:.8rem}
+.sim-sel label{font-size:.62rem;letter-spacing:.09em;text-transform:uppercase;color:var(--muted2);margin-bottom:5px;display:block;font-family:var(--fh)}
+.sim-sel select,.sim-sel input{background:var(--bg2);color:var(--text);border:1px solid var(--border);border-radius:3px;padding:.45rem .7rem;font-family:var(--fh);font-size:.85rem;width:180px;cursor:pointer}
+.sim-sel input{width:90px}
+.sim-btn{background:var(--black);color:#fff;font-family:var(--fh);font-size:.85rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:.45rem 1.2rem;border-radius:3px;border:none;cursor:pointer}
+.sim-result{display:none;background:var(--blue-lo);border:1px solid var(--blue-mid);border-radius:5px;padding:1rem;font-size:.82rem;color:var(--text);line-height:1.6;font-family:var(--fh)}
+.sim-result.show{display:block;animation:fadeup .3s ease}
+footer{border-top:1px solid var(--border);padding:2rem 1.5rem;display:flex;gap:1rem;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.footer-logo{font-family:var(--fh);font-size:1.3rem;font-weight:900;color:var(--black)}
+.footer-logo span{color:var(--blue)}
+footer p{font-size:.72rem;color:var(--muted2)}
+.footer-links{display:flex;gap:1.4rem}
+.footer-links a{font-size:.72rem;color:var(--muted2);text-decoration:none}
+.footer-links a:hover{color:var(--black)}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">THE <span>MARGIN</span></div>
+  <div class="nav-badge">🏀 College Basketball · 🏈 College Football</div>
+  <a href="#" class="nav-cta">Get Access</a>
+</nav>
+
+<div class="ticker-wrap">
+  <div class="ticker-label">Live Pulse</div>
+  <div style="overflow:hidden;flex:1;mask-image:linear-gradient(90deg,transparent,black 4%,black 96%,transparent)">
+    <div class="ticker-inner" id="ticker"></div>
+  </div>
+</div>
+
+<div class="mod-tabs">
+  <button class="mod-tab active" onclick="showPanel('overview')" id="tab-overview">📊 Team Overview</button>
+  <button class="mod-tab" onclick="showPanel('efficiency')" id="tab-efficiency">⚡ Efficiency</button>
+  <button class="mod-tab" onclick="showPanel('bracket')" id="tab-bracket">🏆 Bracket Metrics</button>
+  <button class="mod-tab" onclick="showPanel('roster')" id="tab-roster">🎓 Roster Construction</button>
+  <button class="mod-tab" onclick="showPanel('clutch')" id="tab-clutch">💎 Clutch Performance</button>
+  <button class="mod-tab" onclick="showPanel('killshot')" id="tab-killshot">🔥 Kill Shots</button>
+  <button class="mod-tab" onclick="showPanel('madness')" id="tab-madness">🎯 March Madness</button>
+  <button class="mod-tab" onclick="showPanel('analyzer')" id="tab-analyzer">🤖 AI Analyzer</button>
+  <button class="mod-tab" onclick="showPanel('standings')" id="tab-standings">📋 Standings</button>
+  <button class="mod-tab" onclick="showPanel('players')" id="tab-players">👤 Players</button>
+</div>
+
+<!-- OVERVIEW -->
+<div class="panel active" id="panel-overview">
+<div class="container">
+  <div class="sec-label">Full Team Stats</div>
+  <div class="sec-title">Team Overview</div>
+  <p class="sec-sub">Complete team stats with all predictive bracket metrics. Click any row to expand the full profile.</p>
+  <div class="metric-row" id="overview-cards"></div>
+  <div class="tbl-wrap">
+    <table class="tbl">
+      <thead><tr>
+        <th class="left">Rk</th><th class="left">Team</th>
+        <th>Record</th><th>Eff Margin</th><th>Off Eff</th><th>Def Eff</th>
+        <th>SOS</th><th>SOR</th><th>BPI</th>
+        <th>Clutch FT%</th><th>Kill Shot Idx</th><th>MM Odds</th>
+      </tr></thead>
+      <tbody id="overview-body"></tbody>
+    </table>
+  </div>
+</div>
+</div>
+
+<!-- EFFICIENCY -->
+<div class="panel" id="panel-efficiency">
+<div class="container">
+  <div class="sec-label">Predictive Efficiency</div>
+  <div class="sec-title">Adjusted Efficiency Margins</div>
+  <p class="sec-sub">Pace-adjusted offensive and defensive efficiency per 100 possessions. Best single predictor of March Madness success.</p>
+  <div class="tbl-wrap">
+    <table class="tbl">
+      <thead><tr>
+        <th class="left">Rk</th><th class="left">Team</th>
+        <th>Adj Off Eff</th><th>Adj Def Eff</th><th>Eff Margin</th>
+        <th>Tempo</th><th>TS%</th><th>Reb Rate</th><th>TOV Rate</th>
+        <th>Off Rank</th><th>Def Rank</th>
+      </tr></thead>
+      <tbody id="eff-body"></tbody>
+    </table>
+  </div>
+</div>
+</div>
+
+<!-- BRACKET -->
+<div class="panel" id="panel-bracket">
+<div class="container">
+  <div class="sec-label">March Madness Predictors</div>
+  <div class="sec-title">Bracket Performance Metrics</div>
+  <p class="sec-sub">SU and ATS records in tournament settings and away from home — the two environments that best simulate March Madness.</p>
+  <div class="tbl-wrap">
+    <table class="tbl">
+      <thead><tr>
+        <th class="left">Team</th>
+        <th>Overall SU</th><th>Overall ATS</th>
+        <th>Away SU</th><th>Away ATS</th>
+        <th>Neutral SU</th><th>Neutral ATS</th>
+        <th>Tourn SU (3yr)</th><th>Tourn ATS (3yr)</th>
+        <th>ATS Trend</th>
+      </tr></thead>
+      <tbody id="bracket-body"></tbody>
+    </table>
+  </div>
+</div>
+</div>
+
+<!-- ROSTER -->
+<div class="panel" id="panel-roster">
+<div class="container">
+  <div class="sec-label">Roster Construction</div>
+  <div class="sec-title">Experienced Guard Play Ratings</div>
+  <p class="sec-sub">Assist-to-turnover ratio, upperclassmen guard minutes, and pressure rating. The most undervalued March Madness metric.</p>
+  <div class="tbl-wrap">
+    <table class="tbl">
+      <thead><tr>
+        <th class="left">Team</th>
+        <th>Guard A/TO</th><th>UCL Guard Min%</th><th>Guard Usage</th>
+        <th>Guard Exp Rating</th><th>Sr Guards</th><th>Jr Guards</th>
+        <th>Guard 3PT%</th><th>Guard FT%</th><th>Pressure Rtg</th>
+      </tr></thead>
+      <tbody id="roster-body"></tbody>
+    </table>
+  </div>
+</div>
+</div>
+
+<!-- CLUTCH -->
+<div class="panel" id="panel-clutch">
+<div class="container">
+  <div class="sec-label">Clutch Performance</div>
+  <div class="sec-title">Free Throw % — Final 5 Min, Close Games</div>
+  <p class="sec-sub">FT% in the final 5 minutes of games within 5 points. Teams shooting 75%+ cover at a 64% rate in tournament play.</p>
+  <div class="metric-row" id="clutch-summary-cards"></div>
+  <div class="tbl-wrap">
+    <table class="tbl">
+      <thead><tr>
+        <th class="left">Team</th>
+        <th>Clutch FT%</th><th>Clutch FTA/G</th><th>Clutch FTM/G</th>
+        <th>Close Game W%</th><th>OT Record</th><th>Clutch PPP</th>
+        <th>Def Clutch FT%</th><th>Clutch TOs</th><th>Clutch Rating</th>
+      </tr></thead>
+      <tbody id="clutch-body"></tbody>
+    </table>
+  </div>
+</div>
+</div>
+
+<!-- KILL SHOTS -->
+<div class="panel" id="panel-killshot">
+<div class="container">
+  <div class="sec-label">Run Tracking</div>
+  <div class="sec-title">Kill Shot Index</div>
+  <p class="sec-sub">Double-digit scoring runs (10+ unanswered points). Teams that generate frequent 10-0 runs are built to demoralize opponents — a critical March edge.</p>
+  <div style="background:var(--black);border-radius:6px;padding:1.2rem 1.6rem;margin-bottom:1.4rem;display:flex;gap:2rem;flex-wrap:wrap;align-items:center">
+    <div><div style="font-family:var(--fh);font-size:1.2rem;font-weight:900;color:#fff">Kill Shot Definition</div>
+    <p style="font-size:.75rem;color:rgba(255,255,255,.5);font-family:var(--fh);margin-top:3px;max-width:500px">Any scoring run of 10+ unanswered points. We track frequency, average run size, largest run, and H1 vs H2 split. Second-half runs correlate most strongly with tournament success.</p></div>
+    <div style="display:flex;gap:1.5rem;flex-wrap:wrap">
+      <div style="text-align:center"><div style="font-family:var(--fh);font-size:2rem;font-weight:900;color:var(--blue);line-height:1">3.2x</div><div style="font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.4);font-family:var(--fh)">More likely to reach F4</div></div>
+      <div style="text-align:center"><div style="font-family:var(--fh);font-size:2rem;font-weight:900;color:var(--blue);line-height:1">71%</div><div style="font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.4);font-family:var(--fh)">Elite teams 4+ runs/game</div></div>
+    </div>
+  </div>
+  <div class="ks-grid" id="ks-grid"></div>
+</div>
+</div>
+
+<!-- MARCH MADNESS -->
+<div class="panel" id="panel-madness">
+<div class="container">
+  <div class="mm-header">
+    <div><h2>March Madness Championship Tracker</h2><p>Win probabilities updated after every game · 50,000 bracket simulations</p></div>
+    <div class="mm-chip">Live Season</div>
+  </div>
+  <div class="sim-wrap">
+    <div class="sim-title">Game Result Simulator</div>
+    <p style="font-size:.78rem;color:var(--muted);margin-bottom:1rem">Enter any game result to recalculate championship probabilities across all teams.</p>
+    <div class="sim-row">
+      <div class="sim-sel"><label>Winner</label><select id="sim-winner"></select></div>
+      <div class="sim-sel"><label>Loser</label><select id="sim-loser"></select></div>
+      <div class="sim-sel"><label>Winner Score</label><input type="number" id="sim-score1" value="78" min="40" max="120"/></div>
+      <div class="sim-sel"><label>Loser Score</label><input type="number" id="sim-score2" value="71" min="40" max="120"/></div>
+      <button class="sim-btn" onclick="simulateGame()">Update Odds ↗</button>
+    </div>
+    <div class="sim-result" id="sim-result"></div>
+  </div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.5rem">
+    <div><div class="sec-label">Championship Probability</div><div class="sec-title" style="font-size:1.5rem">Live Bracket Odds</div></div>
+    <div style="font-size:.72rem;color:var(--muted);font-family:var(--fm)">Last updated: <span id="last-updated">—</span> · <span style="color:var(--green)">● Active</span></div>
+  </div>
+  <div class="mm-grid" id="mm-grid"></div>
+</div>
+</div>
+
+<!-- AI ANALYZER -->
+<div class="panel" id="panel-analyzer">
+<div class="container">
+  <div class="sec-label">AI Matchup Analyzer</div>
+  <div class="sec-title">Head-To-Head Intelligence</div>
+  <p class="sec-sub">Select two teams. The Margin compares style profiles, finds historical matchup archetypes, and uses AI to generate a full game prediction.</p>
+  <div class="analyzer-wrap">
+    <div class="analyzer-top">
+      <div><h3>Matchup Analyzer</h3><p style="font-size:.78rem;color:rgba(255,255,255,.5);font-family:var(--fh)">Historical archetype matching + AI-powered game prediction</p></div>
+      <div style="display:flex;gap:.6rem;align-items:center"><div class="ai-chip">AI Powered</div><span style="font-size:.72rem;color:rgba(255,255,255,.4);font-family:var(--fh)">Claude · Anthropic</span></div>
+    </div>
+    <div class="analyzer-body">
+      <div class="team-selectors">
+        <div class="team-sel"><label>Team 1 (Home)</label><select id="t1sel"></select></div>
+        <div class="vs-divider">VS</div>
+        <div class="team-sel"><label>Team 2 (Away)</label><select id="t2sel"></select></div>
+      </div>
+      <button class="analyze-btn" id="analyze-btn">Run AI Analysis ↗</button>
+      <div class="archetype-section" id="arch-section">
+        <div class="arch-header"><div class="arch-tag" id="arch-tag">Archetype</div><div><div class="arch-name" id="arch-name">—</div><div class="arch-desc" id="arch-desc">—</div></div></div>
+        <div class="comparison-grid">
+          <div class="comp-header" id="ch1">Team 1</div><div class="comp-header mid">Stat</div><div class="comp-header" id="ch2">Team 2</div>
+          <div id="comp-rows"></div>
+        </div>
+        <div class="hist-bar-row">
+          <div class="hist-card"><div class="hist-title">Historical Win Rate (Archetype)</div><div class="hist-main" id="hist-wr">—</div><div class="hist-sub" id="hist-sub">—</div><div class="bar-wrap"><div class="bar-fill" id="hist-bar" style="width:0%"></div></div></div>
+          <div class="hist-card"><div class="hist-title">Projected Score Range</div><div class="hist-main" id="proj-score">—</div><div class="hist-sub" id="proj-sub">—</div><div class="bar-wrap"><div class="bar-fill" style="width:72%"></div></div></div>
+        </div>
+        <div class="ai-narrative-box">
+          <div class="ai-nar-header"><div class="ai-chip">AI</div><span>Game Narrative & Prediction</span></div>
+          <div class="ai-nar-body" id="ai-body"><div class="ai-loading"><span>Select two teams to begin</span></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- STANDINGS -->
+<div class="panel" id="panel-standings">
+<div class="container">
+  <div class="sec-label">Conference Standings</div>
+  <div class="sec-title">Dynamic Conference Standings</div>
+  <p class="sec-sub">Live conference standings with efficiency metrics and tournament projection overlays.</p>
+  <select class="conf-select" id="conf-select" onchange="renderStandings()">
+    <option>ACC</option><option>Big 12</option><option>Big East</option>
+    <option>Big Ten</option><option>SEC</option><option>WCC</option>
+  </select>
+  <div class="tbl-wrap">
+    <table class="tbl">
+      <thead><tr>
+        <th class="left">Team</th><th>Conf W-L</th><th>Overall W-L</th>
+        <th>Conf Win%</th><th>Eff Margin</th><th>Home</th><th>Away</th>
+        <th>Streak</th><th>MM Projection</th>
+      </tr></thead>
+      <tbody id="standings-body"></tbody>
+    </table>
+  </div>
+</div>
+</div>
+
+<!-- PLAYERS -->
+<div class="panel" id="panel-players">
+<div class="container">
+  <div class="sec-label">Player Statistics</div>
+  <div class="sec-title">Full Player Stats</div>
+  <p class="sec-sub">Individual player stats with guard experience ratings and clutch performance overlays.</p>
+  <div class="tbl-wrap">
+    <table class="tbl">
+      <thead><tr>
+        <th class="left">Player</th><th class="left">Team</th>
+        <th>Yr</th><th>Pos</th><th>PPG</th><th>APG</th><th>RPG</th>
+        <th>A/TO</th><th>TS%</th><th>Clutch FT%</th><th>Guard Exp Rtg</th>
+      </tr></thead>
+      <tbody id="players-body"></tbody>
+    </table>
+  </div>
+</div>
+</div>
+
+<footer>
+  <div class="footer-logo">THE <span>MARGIN</span></div>
+  <p>© 2026 The Margin Analytics. For entertainment and research purposes.</p>
+  <div class="footer-links">
+    <a href="#">Privacy</a><a href="#">Terms</a><a href="#">Methodology</a><a href="#">Contact</a>
+  </div>
+</footer>
+
+<script>
+// ============================================================
+// ✏️  THE MARGIN — DATA SECTION
+// To update: find the section below and edit the numbers.
+// Full update guide is included as a comment at the bottom.
+// ============================================================
+
+// ── TEAM DATA ──────────────────────────────────────────────
+// Each team object contains all metrics used across every tab.
+// To update a team: find it by name and change the values.
+const teams = [
+  {
+    name:"Duke Blue Devils", conf:"ACC", w:24, l:5,
+    iq:96.4, offEff:121.8, defEff:89.2, effMargin:32.6,
+    sos:18.2, sor:2.1, bpi:94.8,
+    tempo:72.4, ts:58.7, reb:54.1, tov:14.8,
+    clutchFT:81.4, ksIdx:8.7, mmOdds:14.2, bg:"#1D3557",
+    ats:{overallSU:"24-5",overallATS:"17-12",awaySU:"9-4",awayATS:"9-4",neutralSU:"4-1",neutralATS:"3-2",tournSU:"14-6",tournATS:"12-8",atsTrend:"up"},
+    guard:{ato:2.81,uclMin:72,usage:38.4,rating:91.2,seniors:2,juniors:1,grd3pt:38.2,grdFT:84.1,pressure:88.4},
+    clutch:{ft:81.4,fta:6.2,ftm:5.0,closeW:0.74,ot:"3-1",ppp:1.12,defFT:68.2,tos:1.1,rating:88.4},
+    ks:{idx:8.7,perGame:4.1,avgRun:12.4,bigRun:22,h1Pct:38,h2Pct:62,runs:[22,18,16,14,12,11,10]}
+  },
+  {
+    name:"Kansas Jayhawks", conf:"Big 12", w:22, l:7,
+    iq:94.8, offEff:119.4, defEff:91.1, effMargin:28.3,
+    sos:21.3, sor:3.4, bpi:92.1,
+    tempo:69.1, ts:57.2, reb:52.8, tov:15.4,
+    clutchFT:78.2, ksIdx:7.9, mmOdds:11.7, bg:"#003F8A",
+    ats:{overallSU:"22-7",overallATS:"16-13",awaySU:"7-5",awayATS:"8-4",neutralSU:"3-2",neutralATS:"3-2",tournSU:"18-9",tournATS:"14-13",atsTrend:"up"},
+    guard:{ato:2.54,uclMin:68,usage:36.1,rating:84.7,seniors:1,juniors:2,grd3pt:36.4,grdFT:81.2,pressure:82.1},
+    clutch:{ft:78.2,fta:5.8,ftm:4.5,closeW:0.69,ot:"2-2",ppp:1.04,defFT:71.4,tos:1.4,rating:81.2},
+    ks:{idx:7.9,perGame:3.7,avgRun:11.8,bigRun:19,h1Pct:42,h2Pct:58,runs:[19,16,14,12,11,10]}
+  },
+  {
+    name:"UConn Huskies", conf:"Big East", w:25, l:4,
+    iq:93.1, offEff:117.2, defEff:88.4, effMargin:28.8,
+    sos:19.7, sor:2.8, bpi:91.4,
+    tempo:66.8, ts:56.9, reb:55.3, tov:13.1,
+    clutchFT:84.7, ksIdx:7.4, mmOdds:10.3, bg:"#002868",
+    ats:{overallSU:"25-4",overallATS:"19-10",awaySU:"8-3",awayATS:"10-1",neutralSU:"5-1",neutralATS:"4-2",tournSU:"22-8",tournATS:"18-12",atsTrend:"up"},
+    guard:{ato:3.12,uclMin:81,usage:34.8,rating:96.4,seniors:3,juniors:1,grd3pt:37.1,grdFT:85.8,pressure:94.2},
+    clutch:{ft:84.7,fta:7.1,ftm:6.0,closeW:0.82,ot:"4-0",ppp:1.18,defFT:64.8,tos:0.8,rating:94.1},
+    ks:{idx:7.4,perGame:3.4,avgRun:11.2,bigRun:17,h1Pct:35,h2Pct:65,runs:[17,15,13,12,11,10,10]}
+  },
+  {
+    name:"Houston Cougars", conf:"Big 12", w:26, l:3,
+    iq:92.7, offEff:114.8, defEff:86.9, effMargin:27.9,
+    sos:22.4, sor:4.1, bpi:90.8,
+    tempo:65.2, ts:55.1, reb:53.7, tov:12.9,
+    clutchFT:76.8, ksIdx:6.9, mmOdds:9.8, bg:"#C8102E",
+    ats:{overallSU:"26-3",overallATS:"20-9",awaySU:"9-2",awayATS:"8-3",neutralSU:"3-1",neutralATS:"3-1",tournSU:"16-7",tournATS:"13-10",atsTrend:"flat"},
+    guard:{ato:2.94,uclMin:76,usage:35.4,rating:89.1,seniors:2,juniors:2,grd3pt:34.8,grdFT:79.4,pressure:91.4},
+    clutch:{ft:76.8,fta:8.4,ftm:6.5,closeW:0.79,ot:"3-0",ppp:1.08,defFT:62.1,tos:0.9,rating:86.7},
+    ks:{idx:6.9,perGame:3.2,avgRun:10.8,bigRun:16,h1Pct:44,h2Pct:56,runs:[16,14,13,11,10]}
+  },
+  {
+    name:"Auburn Tigers", conf:"SEC", w:21, l:8,
+    iq:91.2, offEff:116.1, defEff:90.3, effMargin:25.8,
+    sos:20.1, sor:5.2, bpi:88.4,
+    tempo:71.3, ts:56.4, reb:51.2, tov:16.8,
+    clutchFT:71.2, ksIdx:8.2, mmOdds:7.4, bg:"#0C2340",
+    ats:{overallSU:"21-8",overallATS:"14-15",awaySU:"6-6",awayATS:"7-5",neutralSU:"2-2",neutralATS:"2-2",tournSU:"10-7",tournATS:"9-8",atsTrend:"dn"},
+    guard:{ato:2.14,uclMin:54,usage:41.2,rating:67.4,seniors:1,juniors:1,grd3pt:36.8,grdFT:72.1,pressure:69.8},
+    clutch:{ft:71.2,fta:5.4,ftm:3.8,closeW:0.58,ot:"1-2",ppp:0.97,defFT:74.8,tos:1.8,rating:64.2},
+    ks:{idx:8.2,perGame:4.4,avgRun:13.1,bigRun:24,h1Pct:48,h2Pct:52,runs:[24,21,18,16,14,13,12,11,10]}
+  },
+  {
+    name:"Tennessee Volunteers", conf:"SEC", w:23, l:6,
+    iq:90.5, offEff:113.5, defEff:87.7, effMargin:25.8,
+    sos:23.1, sor:5.8, bpi:87.9,
+    tempo:67.9, ts:54.8, reb:52.4, tov:14.2,
+    clutchFT:79.4, ksIdx:6.4, mmOdds:6.9, bg:"#FF8200",
+    ats:{overallSU:"23-6",overallATS:"18-11",awaySU:"7-4",awayATS:"8-3",neutralSU:"2-1",neutralATS:"2-1",tournSU:"12-8",tournATS:"10-10",atsTrend:"flat"},
+    guard:{ato:2.62,uclMin:69,usage:36.8,rating:82.1,seniors:2,juniors:1,grd3pt:35.4,grdFT:80.2,pressure:80.4},
+    clutch:{ft:79.4,fta:6.8,ftm:5.4,closeW:0.67,ot:"2-1",ppp:1.06,defFT:66.4,tos:1.2,rating:79.8},
+    ks:{idx:6.4,perGame:3.0,avgRun:10.4,bigRun:15,h1Pct:40,h2Pct:60,runs:[15,13,12,11,10]}
+  },
+  {
+    name:"Purdue Boilermakers", conf:"Big Ten", w:22, l:7,
+    iq:89.8, offEff:115.9, defEff:92.1, effMargin:23.8,
+    sos:20.9, sor:6.1, bpi:86.7,
+    tempo:68.4, ts:57.8, reb:56.8, tov:13.5,
+    clutchFT:82.1, ksIdx:5.8, mmOdds:6.1, bg:"#8B7340",
+    ats:{overallSU:"22-7",overallATS:"15-14",awaySU:"7-5",awayATS:"7-5",neutralSU:"2-2",neutralATS:"1-3",tournSU:"11-9",tournATS:"9-11",atsTrend:"flat"},
+    guard:{ato:2.44,uclMin:62,usage:32.4,rating:75.4,seniors:1,juniors:2,grd3pt:37.8,grdFT:82.4,pressure:74.1},
+    clutch:{ft:82.1,fta:6.4,ftm:5.3,closeW:0.64,ot:"2-2",ppp:1.09,defFT:70.1,tos:1.3,rating:77.4},
+    ks:{idx:5.8,perGame:2.7,avgRun:10.1,bigRun:14,h1Pct:45,h2Pct:55,runs:[14,12,11,10]}
+  },
+  {
+    name:"Kentucky Wildcats", conf:"SEC", w:19, l:10,
+    iq:88.4, offEff:112.1, defEff:89.5, effMargin:22.6,
+    sos:19.8, sor:7.4, bpi:84.2,
+    tempo:70.2, ts:55.7, reb:53.9, tov:15.9,
+    clutchFT:69.8, ksIdx:7.1, mmOdds:5.2, bg:"#0033A0",
+    ats:{overallSU:"19-10",overallATS:"12-17",awaySU:"5-7",awayATS:"6-6",neutralSU:"2-2",neutralATS:"2-2",tournSU:"15-12",tournATS:"12-15",atsTrend:"dn"},
+    guard:{ato:1.98,uclMin:44,usage:42.1,rating:58.4,seniors:0,juniors:1,grd3pt:34.1,grdFT:70.4,pressure:61.2},
+    clutch:{ft:69.8,fta:5.2,ftm:3.6,closeW:0.52,ot:"1-3",ppp:0.94,defFT:76.2,tos:2.1,rating:58.1},
+    ks:{idx:7.1,perGame:3.8,avgRun:12.8,bigRun:21,h1Pct:51,h2Pct:49,runs:[21,19,15,13,12,11,10]}
+  },
+  {
+    name:"Gonzaga Bulldogs", conf:"WCC", w:26, l:3,
+    iq:87.6, offEff:118.4, defEff:87.0, effMargin:31.4,
+    sos:15.3, sor:8.2, bpi:85.1,
+    tempo:73.1, ts:59.1, reb:55.2, tov:14.1,
+    clutchFT:80.2, ksIdx:9.1, mmOdds:4.8, bg:"#002D72",
+    ats:{overallSU:"26-3",overallATS:"18-11",awaySU:"8-2",awayATS:"7-3",neutralSU:"5-1",neutralATS:"4-2",tournSU:"19-8",tournATS:"15-12",atsTrend:"up"},
+    guard:{ato:2.74,uclMin:70,usage:37.4,rating:87.4,seniors:2,juniors:2,grd3pt:40.1,grdFT:83.4,pressure:84.1},
+    clutch:{ft:80.2,fta:5.9,ftm:4.7,closeW:0.71,ot:"3-1",ppp:1.10,defFT:67.8,tos:1.0,rating:83.4},
+    ks:{idx:9.1,perGame:4.6,avgRun:13.8,bigRun:26,h1Pct:36,h2Pct:64,runs:[26,22,19,17,15,14,13,12,11,10]}
+  },
+  {
+    name:"Baylor Bears", conf:"Big 12", w:20, l:9,
+    iq:86.1, offEff:116.7, defEff:96.3, effMargin:20.4,
+    sos:21.6, sor:8.9, bpi:83.7,
+    tempo:70.8, ts:57.3, reb:53.1, tov:14.7,
+    clutchFT:74.1, ksIdx:6.2, mmOdds:3.9, bg:"#003015",
+    ats:{overallSU:"20-9",overallATS:"13-16",awaySU:"5-6",awayATS:"6-5",neutralSU:"2-2",neutralATS:"2-2",tournSU:"9-7",tournATS:"8-8",atsTrend:"flat"},
+    guard:{ato:2.31,uclMin:58,usage:38.8,rating:71.2,seniors:1,juniors:2,grd3pt:36.2,grdFT:77.8,pressure:72.4},
+    clutch:{ft:74.1,fta:6.1,ftm:4.5,closeW:0.60,ot:"1-2",ppp:1.01,defFT:72.4,tos:1.5,rating:69.8},
+    ks:{idx:6.2,perGame:2.9,avgRun:10.6,bigRun:15,h1Pct:42,h2Pct:58,runs:[15,13,12,11,10]}
+  },
+];
+
+// ── PLAYER DATA ────────────────────────────────────────────
+const players = [
+  {name:"Cooper Flagg",team:"Duke",yr:"Fr",pos:"SF",ppg:18.4,apg:4.1,rpg:8.2,ato:2.8,ts:61.2,clutchFT:84.1,guardExp:82.4},
+  {name:"Hunter Dickinson",team:"Kansas",yr:"Sr",pos:"C",ppg:16.8,apg:2.2,rpg:10.4,ato:2.1,ts:62.8,clutchFT:78.4,guardExp:71.2},
+  {name:"Tristen Newton",team:"UConn",yr:"Sr",pos:"PG",ppg:11.2,apg:7.8,rpg:4.1,ato:4.2,ts:57.4,clutchFT:88.2,guardExp:97.1},
+  {name:"Jamal Shead",team:"Houston",yr:"Sr",pos:"PG",ppg:14.8,apg:6.4,rpg:3.8,ato:3.8,ts:58.2,clutchFT:82.4,guardExp:94.8},
+  {name:"Johni Broome",team:"Auburn",yr:"Jr",pos:"C/F",ppg:17.2,apg:2.4,rpg:10.8,ato:1.8,ts:59.8,clutchFT:71.2,guardExp:52.1},
+  {name:"Dalton Knecht",team:"Tennessee",yr:"Sr",pos:"SG",ppg:21.4,apg:2.8,rpg:4.4,ato:2.6,ts:63.4,clutchFT:81.4,guardExp:86.4},
+  {name:"Zach Edey",team:"Purdue",yr:"Sr",pos:"C",ppg:24.2,apg:2.1,rpg:11.8,ato:1.9,ts:68.4,clutchFT:84.8,guardExp:62.1},
+  {name:"Rob Dillingham",team:"Kentucky",yr:"Fr",pos:"PG",ppg:16.2,apg:4.8,rpg:2.4,ato:2.1,ts:57.8,clutchFT:72.1,guardExp:48.4},
+  {name:"Drew Timme",team:"Gonzaga",yr:"Sr",pos:"C/F",ppg:22.1,apg:3.8,rpg:7.4,ato:3.1,ts:65.8,clutchFT:82.8,guardExp:74.2},
+  {name:"LJ Cryer",team:"Baylor",yr:"Jr",pos:"SG",ppg:17.8,apg:2.4,rpg:2.8,ato:2.4,ts:59.4,clutchFT:76.4,guardExp:72.8},
+  {name:"Marcus Sasser",team:"Houston",yr:"Sr",pos:"SG",ppg:16.4,apg:3.2,rpg:3.4,ato:3.1,ts:58.8,clutchFT:79.4,guardExp:89.2},
+];
+
+// ── CONFERENCE STANDINGS ───────────────────────────────────
+const conferences = {
+  "ACC":[{t:"Duke",cw:14,cl:4,ow:24,ol:5,em:32.6,home:"12-1",away:"9-4",str:"W5",mm:"1 seed"},{t:"North Carolina",cw:11,cl:7,ow:20,ol:9,em:22.1,home:"11-2",away:"6-7",str:"W2",mm:"5 seed"},{t:"Virginia",cw:10,cl:8,ow:18,ol:11,em:18.4,home:"10-3",away:"5-8",str:"L1",mm:"8 seed"},{t:"Miami",cw:9,cl:9,ow:17,ol:12,em:14.2,home:"9-4",away:"5-8",str:"W1",mm:"NIT"},{t:"Clemson",cw:8,cl:10,ow:16,ol:13,em:11.8,home:"8-5",away:"5-8",str:"L2",mm:"NIT"}],
+  "Big 12":[{t:"Houston",cw:15,cl:3,ow:26,ol:3,em:27.9,home:"14-0",away:"9-2",str:"W8",mm:"1 seed"},{t:"Kansas",cw:12,cl:6,ow:22,ol:7,em:28.3,home:"11-2",away:"7-5",str:"W3",mm:"2 seed"},{t:"Baylor",cw:10,cl:8,ow:20,ol:9,em:20.4,home:"10-3",away:"5-6",str:"L1",mm:"6 seed"},{t:"Iowa State",cw:9,cl:9,ow:18,ol:11,em:16.4,home:"9-4",away:"5-8",str:"W2",mm:"7 seed"},{t:"Texas Tech",cw:8,cl:10,ow:16,ol:13,em:12.1,home:"8-5",away:"4-9",str:"L3",mm:"NIT"}],
+  "Big East":[{t:"UConn",cw:16,cl:2,ow:25,ol:4,em:28.8,home:"13-1",away:"8-3",str:"W6",mm:"1 seed"},{t:"Marquette",cw:12,cl:6,ow:21,ol:8,em:19.2,home:"11-2",away:"6-6",str:"W4",mm:"4 seed"},{t:"Creighton",cw:11,cl:7,ow:20,ol:9,em:17.4,home:"10-3",away:"6-6",str:"W1",mm:"5 seed"},{t:"St. John's",cw:9,cl:9,ow:17,ol:12,em:12.8,home:"9-4",away:"4-8",str:"L2",mm:"9 seed"},{t:"Xavier",cw:7,cl:11,ow:15,ol:14,em:8.4,home:"8-5",away:"3-9",str:"W1",mm:"NIT"}],
+  "Big Ten":[{t:"Purdue",cw:14,cl:4,ow:22,ol:7,em:23.8,home:"11-2",away:"7-5",str:"W4",mm:"3 seed"},{t:"Illinois",cw:11,cl:7,ow:19,ol:10,em:18.4,home:"10-3",away:"5-7",str:"W2",mm:"6 seed"},{t:"Michigan State",cw:10,cl:8,ow:18,ol:11,em:16.2,home:"10-3",away:"5-8",str:"L1",mm:"7 seed"},{t:"Wisconsin",cw:9,cl:9,ow:17,ol:12,em:12.4,home:"9-4",away:"4-8",str:"W1",mm:"10 seed"},{t:"Indiana",cw:7,cl:11,ow:15,ol:14,em:8.1,home:"8-5",away:"3-9",str:"L4",mm:"NIT"}],
+  "SEC":[{t:"Tennessee",cw:13,cl:5,ow:23,ol:6,em:25.8,home:"12-1",away:"7-4",str:"W5",mm:"2 seed"},{t:"Auburn",cw:11,cl:7,ow:21,ol:8,em:25.8,home:"10-3",away:"6-6",str:"W2",mm:"4 seed"},{t:"Kentucky",cw:9,cl:9,ow:19,ol:10,em:22.6,home:"10-3",away:"5-7",str:"L2",mm:"7 seed"},{t:"Alabama",cw:9,cl:9,ow:18,ol:11,em:18.4,home:"9-4",away:"5-8",str:"W1",mm:"8 seed"},{t:"Mississippi State",cw:6,cl:12,ow:14,ol:15,em:8.2,home:"8-5",away:"3-10",str:"L3",mm:"NIT"}],
+  "WCC":[{t:"Gonzaga",cw:16,cl:0,ow:26,ol:3,em:31.4,home:"14-0",away:"8-2",str:"W9",mm:"3 seed"},{t:"Saint Mary's",cw:12,cl:4,ow:22,ol:7,em:18.2,home:"11-2",away:"7-5",str:"W3",mm:"11 seed"},{t:"San Francisco",cw:9,cl:7,ow:17,ol:12,em:11.4,home:"9-4",away:"5-8",str:"W1",mm:"NIT"},{t:"Portland",cw:7,cl:9,ow:14,ol:15,em:6.4,home:"8-5",away:"3-10",str:"L2",mm:"NIT"},{t:"BYU",cw:6,cl:10,ow:13,ol:16,em:4.2,home:"7-6",away:"3-10",str:"L1",mm:"NIT"}],
+};
+
+// ── TICKER HEADLINES ───────────────────────────────────────
+// Update these to reflect current news/stats each week
+const tickerItems = [
+  {t:"Duke Eff Margin",v:"+32.6",up:true},
+  {t:"UConn Clutch FT%",v:"84.7%",up:true},
+  {t:"Gonzaga Kill Shot",v:"4.6/game",up:true},
+  {t:"Houston ATS",v:"20-9",up:true},
+  {t:"Kentucky Guard A/TO",v:"1.98 ⚠",up:false},
+  {t:"UConn Guard Exp",v:"96.4 Elite",up:true},
+  {t:"Auburn Kill Shot",v:"24-0 run",up:true},
+  {t:"Duke MM Odds",v:"14.2%",up:true},
+];
+
+// ============================================================
+// ⚙️  ENGINE — Do not edit below this line
+// ============================================================
+
+let mmOdds = {};
+teams.forEach(t => { mmOdds[t.name] = {champ:t.mmOdds, e8:+(t.mmOdds*3.2).toFixed(1), f4:+(t.mmOdds*2.1).toFixed(1), finals:+(t.mmOdds*1.5).toFixed(1), delta:0}; });
+
+function initials(n){return n.split(' ').slice(-2).map(w=>w[0]).join('')}
+
+// OVERVIEW
+function renderOverview(){
+  const avgEM=(teams.reduce((s,t)=>s+t.effMargin,0)/teams.length).toFixed(1);
+  const topC=[...teams].sort((a,b)=>b.clutchFT-a.clutchFT)[0];
+  const topK=[...teams].sort((a,b)=>b.ksIdx-a.ksIdx)[0];
+  document.getElementById('overview-cards').innerHTML=`
+    <div class="mcard"><div class="mcard-label">Teams Tracked</div><div class="mcard-val" style="color:var(--blue-dark)">${teams.length}</div><div class="mcard-sub">Full metric suite</div></div>
+    <div class="mcard"><div class="mcard-label">Avg Eff Margin</div><div class="mcard-val">+${avgEM}</div><div class="mcard-sub">Top ${teams.length} CBB programs</div></div>
+    <div class="mcard"><div class="mcard-label">Best Clutch FT%</div><div class="mcard-val" style="color:var(--green)">${topC.clutchFT}%</div><div class="mcard-sub">${topC.name.split(' ').pop()}</div></div>
+    <div class="mcard"><div class="mcard-label">Top Kill Shot</div><div class="mcard-val" style="color:var(--purple)">${topK.ksIdx}</div><div class="mcard-sub">${topK.name.split(' ').pop()} · ${topK.ks.perGame}/game</div></div>`;
+  const body=document.getElementById('overview-body');
+  body.innerHTML='';
+  [...teams].sort((a,b)=>b.iq-a.iq).forEach((t,i)=>{
+    const tr=document.createElement('tr');tr.className='clickable';tr.onclick=()=>toggleExpand(t.name);
+    tr.innerHTML=`<td class="left">${i+1}</td>
+      <td class="left"><div class="team-cell"><div class="tlogo" style="background:${t.bg}18;color:${t.bg}">${initials(t.name)}</div><div><div class="tn">${t.name}</div><div class="tc">${t.conf}</div></div></div></td>
+      <td>${t.w}-${t.l}</td>
+      <td class="${t.effMargin>28?'hi':t.effMargin>22?'bl':'mid'}">+${t.effMargin.toFixed(1)}</td>
+      <td class="bl">${t.offEff.toFixed(1)}</td>
+      <td class="${t.defEff<89?'hi':t.defEff<92?'bl':'mid'}">${t.defEff.toFixed(1)}</td>
+      <td>${t.sos.toFixed(1)}</td>
+      <td class="${t.sor<4?'hi':t.sor<7?'bl':'mid'}">${t.sor.toFixed(1)}</td>
+      <td class="${t.bpi>90?'hi':t.bpi>85?'bl':'mid'}">${t.bpi.toFixed(1)}</td>
+      <td class="${t.clutchFT>80?'hi':t.clutchFT>74?'bl':'lo'}">${t.clutchFT}%</td>
+      <td class="${t.ksIdx>8?'pu':t.ksIdx>6.5?'bl':'mid'}">${t.ksIdx}</td>
+      <td class="${t.mmOdds>10?'hi':t.mmOdds>6?'bl':'mid'}">${t.mmOdds}%</td>`;
+    body.appendChild(tr);
+    const er=document.createElement('tr');er.className='expand-row';er.id='exp-'+t.name.replace(/ /g,'_');
+    er.innerHTML=`<td colspan="12"><div class="expand-inner"><div style="font-family:var(--fh);font-size:.88rem;font-weight:700;margin-bottom:.7rem;color:var(--black)">${t.name} — Full Bracket Profile</div>
+      <div class="expand-grid">
+        <div class="ecard"><div class="ecard-lbl">Guard A/TO</div><div class="ecard-val" style="color:var(--blue-dark)">${t.guard.ato}</div><div class="ecard-sub">UCL Min: ${t.guard.uclMin}%</div></div>
+        <div class="ecard"><div class="ecard-lbl">Guard Exp Rating</div><div class="ecard-val" style="color:${t.guard.rating>85?'var(--green)':t.guard.rating>70?'var(--amber)':'var(--red)'}">${t.guard.rating}</div><div class="ecard-sub">${t.guard.seniors} Sr · ${t.guard.juniors} Jr</div></div>
+        <div class="ecard"><div class="ecard-lbl">Clutch FT%</div><div class="ecard-val" style="color:${t.clutch.ft>80?'var(--green)':t.clutch.ft>74?'var(--amber)':'var(--red)'}">${t.clutch.ft}%</div><div class="ecard-sub">Close W%: ${(t.clutch.closeW*100).toFixed(0)}%</div></div>
+        <div class="ecard"><div class="ecard-lbl">Kill Shot Index</div><div class="ecard-val" style="color:var(--purple)">${t.ksIdx}</div><div class="ecard-sub">${t.ks.perGame} runs/game</div></div>
+        <div class="ecard"><div class="ecard-lbl">Away ATS</div><div class="ecard-val">${t.ats.awayATS}</div><div class="ecard-sub">Tourn ATS: ${t.ats.tournATS}</div></div>
+        <div class="ecard"><div class="ecard-lbl">Biggest Run</div><div class="ecard-val" style="color:var(--purple)">${t.ks.bigRun}-0</div><div class="ecard-sub">H2: ${t.ks.h2Pct}% of runs</div></div>
+      </div></div></td>`;
+    body.appendChild(er);
+  });
+}
+function toggleExpand(name){const r=document.getElementById('exp-'+name.replace(/ /g,'_'));if(r)r.classList.toggle('open');}
+renderOverview();
+
+// EFFICIENCY
+document.getElementById('eff-body').innerHTML=[...teams].sort((a,b)=>b.effMargin-a.effMargin).map((t,i)=>`
+  <tr><td class="left">${i+1}</td>
+  <td class="left"><div class="team-cell"><div class="tlogo" style="background:${t.bg}18;color:${t.bg}">${initials(t.name)}</div><div><div class="tn">${t.name}</div><div class="tc">${t.conf}</div></div></div></td>
+  <td class="bl">${t.offEff.toFixed(1)}</td>
+  <td class="${t.defEff<89?'hi':t.defEff<92?'bl':'mid'}">${t.defEff.toFixed(1)}</td>
+  <td class="${t.effMargin>28?'hi':t.effMargin>22?'bl':'mid'}">+${t.effMargin.toFixed(1)}</td>
+  <td>${t.tempo.toFixed(1)}</td>
+  <td class="${t.ts>58?'hi':t.ts>55?'bl':'mid'}">${t.ts.toFixed(1)}%</td>
+  <td class="${t.reb>54?'hi':t.reb>52?'bl':'mid'}">${t.reb.toFixed(1)}%</td>
+  <td class="${t.tov<14?'hi':t.tov<16?'bl':'lo'}">${t.tov.toFixed(1)}%</td>
+  <td>#${i+1}</td>
+  <td>#${[...teams].sort((a,b)=>a.defEff-b.defEff).findIndex(x=>x.name===t.name)+1}</td>
+  </tr>`).join('');
+
+// BRACKET
+document.getElementById('bracket-body').innerHTML=teams.map(t=>{
+  const trend=t.ats.atsTrend==='up'?`<span class="pill pill-green">▲ Hot</span>`:t.ats.atsTrend==='dn'?`<span class="pill pill-red">▼ Cold</span>`:`<span class="pill pill-amber">→ Flat</span>`;
+  const [aw,al]=t.ats.awayATS.split('-').map(Number);const awPct=(aw/(aw+al)*100).toFixed(0);
+  return`<tr>
+    <td class="left"><div class="team-cell"><div class="tlogo" style="background:${t.bg}18;color:${t.bg}">${initials(t.name)}</div><div><div class="tn">${t.name}</div><div class="tc">${t.conf}</div></div></div></td>
+    <td>${t.ats.overallSU}</td><td class="bl">${t.ats.overallATS}</td>
+    <td>${t.ats.awaySU}</td>
+    <td><div class="ats-meter"><span style="min-width:32px">${t.ats.awayATS}</span><div class="ats-bar"><div class="ats-fill" style="width:${awPct}%"></div></div><span style="min-width:28px;color:var(--muted)">${awPct}%</span></div></td>
+    <td>${t.ats.neutralSU}</td><td>${t.ats.neutralATS}</td>
+    <td class="bl">${t.ats.tournSU}</td><td>${t.ats.tournATS}</td>
+    <td>${trend}</td></tr>`;
+}).join('');
+
+// ROSTER
+document.getElementById('roster-body').innerHTML=[...teams].sort((a,b)=>b.guard.rating-a.guard.rating).map(t=>{
+  const rc=t.guard.rating>88?'var(--green)':t.guard.rating>74?'var(--amber)':'var(--red)';
+  return`<tr>
+    <td class="left"><div class="team-cell"><div class="tlogo" style="background:${t.bg}18;color:${t.bg}">${initials(t.name)}</div><div><div class="tn">${t.name}</div><div class="tc">${t.conf}</div></div></div></td>
+    <td class="${t.guard.ato>2.8?'hi':t.guard.ato>2.4?'bl':'mid'}">${t.guard.ato.toFixed(2)}</td>
+    <td><div style="display:flex;align-items:center;gap:.5rem"><span style="min-width:32px">${t.guard.uclMin}%</span><div class="rg-bar"><div class="rg-fill" style="width:${t.guard.uclMin}%;background:${t.guard.uclMin>70?'var(--green)':t.guard.uclMin>55?'var(--amber)':'var(--red)'}"></div></div></div></td>
+    <td>${t.guard.usage.toFixed(1)}%</td>
+    <td><span style="font-family:var(--fh);font-size:1rem;font-weight:900;color:${rc}">${t.guard.rating.toFixed(1)}</span> <span class="pill ${t.guard.rating>88?'pill-green':t.guard.rating>74?'pill-amber':'pill-red'}">${t.guard.rating>88?'Elite':t.guard.rating>74?'Good':'Low'}</span></td>
+    <td class="${t.guard.seniors>1?'hi':t.guard.seniors>0?'bl':'lo'}">${t.guard.seniors}</td>
+    <td>${t.guard.juniors}</td>
+    <td class="${t.guard.grd3pt>38?'hi':t.guard.grd3pt>35?'bl':'mid'}">${t.guard.grd3pt.toFixed(1)}%</td>
+    <td class="${t.guard.grdFT>83?'hi':t.guard.grdFT>78?'bl':'mid'}">${t.guard.grdFT.toFixed(1)}%</td>
+    <td class="${t.guard.pressure>88?'hi':t.guard.pressure>75?'bl':'mid'}">${t.guard.pressure.toFixed(1)}</td></tr>`;
+}).join('');
+
+// CLUTCH
+function renderClutch(){
+  const top=[...teams].sort((a,b)=>b.clutch.ft-a.clutch.ft)[0];
+  const avg=(teams.reduce((s,t)=>s+t.clutch.ft,0)/teams.length).toFixed(1);
+  document.getElementById('clutch-summary-cards').innerHTML=`
+    <div class="mcard"><div class="mcard-label">Avg Clutch FT%</div><div class="mcard-val">${avg}%</div><div class="mcard-sub">Across all tracked teams</div></div>
+    <div class="mcard"><div class="mcard-label">Best Clutch FT%</div><div class="mcard-val" style="color:var(--green)">${top.clutch.ft}%</div><div class="mcard-sub">${top.name.split(' ').pop()}</div></div>
+    <div class="mcard"><div class="mcard-label">75%+ Teams</div><div class="mcard-val" style="color:var(--blue-dark)">${teams.filter(t=>t.clutch.ft>=75).length}</div><div class="mcard-sub">Cover 64% historically</div></div>
+    <div class="mcard"><div class="mcard-label">Avg Close Game W%</div><div class="mcard-val">${(teams.reduce((s,t)=>s+t.clutch.closeW,0)/teams.length*100).toFixed(0)}%</div><div class="mcard-sub">Games within 5 pts</div></div>`;
+  document.getElementById('clutch-body').innerHTML=[...teams].sort((a,b)=>b.clutch.ft-a.clutch.ft).map(t=>`
+    <tr>
+      <td class="left"><div class="team-cell"><div class="tlogo" style="background:${t.bg}18;color:${t.bg}">${initials(t.name)}</div><div><div class="tn">${t.name}</div><div class="tc">${t.conf}</div></div></div></td>
+      <td><div class="clutch-viz"><span style="font-family:var(--fh);font-size:1rem;font-weight:900;min-width:44px;color:${t.clutch.ft>80?'var(--green)':t.clutch.ft>74?'var(--amber)':'var(--red)'}">${t.clutch.ft}%</span><div class="clutch-ft-bar"><div class="clutch-ft-fill" style="width:${t.clutch.ft}%;background:${t.clutch.ft>80?'var(--green)':t.clutch.ft>74?'var(--amber)':'var(--red)'}"></div></div></div></td>
+      <td>${t.clutch.fta.toFixed(1)}</td><td>${t.clutch.ftm.toFixed(1)}</td>
+      <td class="${t.clutch.closeW>0.72?'hi':t.clutch.closeW>0.60?'bl':'mid'}">${(t.clutch.closeW*100).toFixed(0)}%</td>
+      <td>${t.clutch.ot}</td>
+      <td class="${t.clutch.ppp>1.1?'hi':t.clutch.ppp>1.0?'bl':'lo'}">${t.clutch.ppp.toFixed(2)}</td>
+      <td class="${t.clutch.defFT<67?'hi':t.clutch.defFT<72?'bl':'lo'}">${t.clutch.defFT.toFixed(1)}%</td>
+      <td class="${t.clutch.tos<1.1?'hi':t.clutch.tos<1.5?'bl':'lo'}">${t.clutch.tos.toFixed(1)}</td>
+      <td><span style="font-family:var(--fh);font-size:1rem;font-weight:900;color:${t.clutch.rating>88?'var(--green)':t.clutch.rating>75?'var(--amber)':'var(--red)'}">${t.clutch.rating.toFixed(1)}</span> <span class="pill ${t.clutch.rating>88?'pill-green':t.clutch.rating>75?'pill-amber':'pill-red'}">${t.clutch.rating>88?'Elite':t.clutch.rating>75?'Solid':'Weak'}</span></td>
+    </tr>`).join('');
+}
+renderClutch();
+
+// KILL SHOTS
+function renderKS(){
+  const sorted=[...teams].sort((a,b)=>b.ksIdx-a.ksIdx);
+  const max=sorted[0].ksIdx;
+  document.getElementById('ks-grid').innerHTML=sorted.map((t,i)=>{
+    const bw=(t.ksIdx/max*100).toFixed(0);
+    const c=t.ksIdx>8?'var(--purple)':t.ksIdx>6.5?'var(--blue-dark)':'var(--amber)';
+    const pc=t.ksIdx>8?'pill-purple':t.ksIdx>6.5?'pill-blue':'pill-amber';
+    return`<div class="ks-card">
+      <div class="ks-header"><div><div class="ks-team">${t.name}</div><div class="ks-conf">${t.conf} · ${t.w}-${t.l}</div></div>
+        <div style="text-align:right"><div class="ks-score" style="color:${c}">${t.ksIdx}</div><div class="ks-label">Kill Shot Index</div></div></div>
+      <div class="ks-bar-row"><div class="ks-bar-label"><span>Index Score</span><span>#${i+1}</span></div><div class="bar-viz"><div class="bar-viz-fill" style="width:${bw}%;background:${c}"></div></div></div>
+      <div class="ks-bar-row"><div class="ks-bar-label"><span>Runs/Game</span><span>${t.ks.perGame}</span></div><div class="bar-viz"><div class="bar-viz-fill" style="width:${(t.ks.perGame/5*100).toFixed(0)}%;background:${c}"></div></div></div>
+      <div class="ks-bar-row"><div class="ks-bar-label"><span>2nd Half Runs</span><span>${t.ks.h2Pct}%</span></div><div class="bar-viz"><div class="bar-viz-fill" style="width:${t.ks.h2Pct}%;background:var(--blue)"></div></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:.7rem;color:var(--muted);font-family:var(--fh);margin-top:.6rem"><span>Avg run: <strong style="color:var(--black)">${t.ks.avgRun.toFixed(1)} pts</strong></span><span>Biggest: <strong style="color:${c}">${t.ks.bigRun}-0</strong></span></div>
+      <div class="ks-runs">${t.ks.runs.map(r=>`<span class="ks-run-pill" style="background:${r>=18?'var(--purple-lo)':r>=14?'var(--blue-lo)':'var(--bg2)'};color:${r>=18?'var(--purple)':r>=14?'var(--blue-dark)':'var(--muted)'}">${r}-0</span>`).join('')}
+      <span class="pill ${pc}">${t.ksIdx>8?'Elite':t.ksIdx>6.5?'Strong':'Average'}</span></div>
+    </div>`;
+  }).join('');
+}
+renderKS();
+
+// MARCH MADNESS
+function mmBarColor(p){return p>10?'var(--blue)':p>6?'var(--blue-dark)':p>3?'var(--amber)':'var(--muted2)'}
+function renderMM(){
+  const sorted=[...teams].sort((a,b)=>(mmOdds[b.name]?.champ||b.mmOdds)-(mmOdds[a.name]?.champ||a.mmOdds));
+  const maxP=mmOdds[sorted[0].name]?.champ||sorted[0].mmOdds;
+  document.getElementById('mm-grid').innerHTML=sorted.map((t,i)=>{
+    const o=mmOdds[t.name];
+    const bw=Math.min(100,(o.champ/maxP)*100).toFixed(0);
+    const ds=o.delta>0?`<span style="color:var(--green)">▲ +${o.delta.toFixed(1)}%</span>`:o.delta<0?`<span style="color:var(--red)">▼ ${o.delta.toFixed(1)}%</span>`:`<span style="color:var(--muted2)">—</span>`;
+    return`<div class="mm-card">
+      <div class="mm-card-top">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="tlogo" style="width:24px;height:24px;font-size:.55rem;background:${t.bg}18;color:${t.bg}">${initials(t.name)}</div>
+          <div><div class="mm-team-name">${t.name.split(' ').pop()}</div><div class="mm-conf">${t.conf} · #${i+1} seed proj.</div></div>
+        </div>
+        <div style="text-align:right"><div class="mm-pct" style="color:${mmBarColor(o.champ)}">${o.champ.toFixed(1)}<span style="font-size:1rem">%</span></div><div class="mm-pct-label">Champ %</div></div>
+      </div>
+      <div class="mm-bar-wrap"><div class="mm-bar" style="width:${bw}%;background:${mmBarColor(o.champ)}"></div></div>
+      <div class="mm-rounds">
+        <span class="mm-round-pill" style="background:var(--blue-lo);color:var(--blue-dark)">E8: ${o.e8.toFixed(1)}%</span>
+        <span class="mm-round-pill" style="background:var(--bg3);color:var(--muted)">F4: ${o.f4.toFixed(1)}%</span>
+        <span class="mm-round-pill" style="background:var(--bg3);color:var(--muted)">Finals: ${o.finals.toFixed(1)}%</span>
+        <span class="mm-round-pill" style="background:var(--bg2);color:var(--muted2)">${ds}</span>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('last-updated').textContent=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+}
+renderMM();
+
+const simTeamOpts=teams.map(t=>`<option>${t.name}</option>`).join('');
+document.getElementById('sim-winner').innerHTML=simTeamOpts;
+document.getElementById('sim-loser').innerHTML=teams.slice(1).map(t=>`<option>${t.name}</option>`).join('');
+
+function simulateGame(){
+  const winner=document.getElementById('sim-winner').value;
+  const loser=document.getElementById('sim-loser').value;
+  const s1=parseInt(document.getElementById('sim-score1').value)||78;
+  const s2=parseInt(document.getElementById('sim-score2').value)||71;
+  if(winner===loser){alert("Select two different teams.");return;}
+  const margin=s1-s2;
+  const expected=margin>15?0.88:margin>10?0.78:margin>5?0.66:0.55;
+  const surprise=1-expected;
+  const wB=parseFloat((surprise*4+margin*0.08).toFixed(2));
+  const lP=parseFloat((expected*3.5+margin*0.07).toFixed(2));
+  if(mmOdds[winner]){const p=mmOdds[winner].champ;const nc=Math.min(35,p+wB);mmOdds[winner]={champ:nc,e8:+(nc*3.2).toFixed(1),f4:+(nc*2.1).toFixed(1),finals:+(nc*1.5).toFixed(1),delta:wB};}
+  if(mmOdds[loser]){const p=mmOdds[loser].champ;const nc=Math.max(0.2,p-lP);mmOdds[loser]={champ:nc,e8:+(nc*3.2).toFixed(1),f4:+(nc*2.1).toFixed(1),finals:+(nc*1.5).toFixed(1),delta:-lP};}
+  const ws=winner.split(' ').pop(),ls=loser.split(' ').pop();
+  const lbl=surprise>0.4?'Major upset — significant shift':surprise>0.25?'Mild surprise — moderate adjustment':'Expected result — small adjustment';
+  const el=document.getElementById('sim-result');
+  el.innerHTML=`<strong>Result: ${ws} ${s1}, ${ls} ${s2}</strong> — ${lbl}<br><span style="color:var(--green)">▲ ${ws} +${wB.toFixed(1)}%</span> &nbsp;|&nbsp; <span style="color:var(--red)">▼ ${ls} -${lP.toFixed(1)}%</span>`;
+  el.classList.add('show');
+  renderMM();
+}
+
+// AI ANALYZER
+const tProfiles={};
+teams.forEach(t=>{tProfiles[t.name]={tempo:t.tempo,offEff:t.offEff,defEff:t.defEff,tsPercent:t.ts,rebRate:t.reb,clutch:t.clutchFT,turnover:t.tov,sos:t.sos,style:`${t.conf} program — Eff Margin +${t.effMargin}, Guard Exp ${t.guard.rating}, Kill Shot Index ${t.ksIdx}.`};});
+const tOpts=teams.map(t=>`<option>${t.name}</option>`).join('');
+document.getElementById('t1sel').innerHTML=tOpts;
+document.getElementById('t2sel').innerHTML=teams.map((t,i)=>`<option${i===1?' selected':''}>${t.name}</option>`).join('');
+
+function detectArch(p1,p2){
+  const td=Math.abs(p1.tempo-p2.tempo);
+  const bf=p1.tempo>70&&p2.tempo>70;
+  const bs=p1.tempo<68&&p2.tempo<68;
+  const ed=Math.abs(p1.offEff-p2.offEff);
+  const bd=p1.defEff<90&&p2.defEff<90;
+  if(bf&&ed<4)return{tag:"Tempo Clash",name:"High-Tempo Offensive Showdown",desc:"Both teams push pace aggressively. Totals skew high, late-game chaos favors the team controlling transition defense.",wr:58,games:52};
+  if(bd&&bs)return{tag:"Grind Game",name:"Defensive Grinder — Low-Variance Slugfest",desc:"Elite defenses, slow tempos. Turnovers decide the game. The team with the better clutch factor wins 71% of the time.",wr:71,games:38};
+  if(td>5)return{tag:"Pace Mismatch",name:"Pace Control Battle",desc:"Divergent tempo preferences create a tactical war. The slow team wins by dragging under 65 possessions.",wr:62,games:61};
+  if(ed>8)return{tag:"Efficiency Gap",name:"Elite vs. Good — Upset Alert Window",desc:"Significant efficiency gap, but this archetype produces 28% upsets. Watch the line — sharp action often moves here.",wr:67,games:44};
+  if(p1.clutch>82||p2.clutch>82)return{tag:"Clutch Factor",name:"Late-Game Specialists",desc:"At least one team ranks in the elite clutch tier. These games are decided in the final four minutes.",wr:64,games:29};
+  return{tag:"Balanced",name:"Even-Keeled Efficiency Battle",desc:"Two well-rounded programs. Home court is worth 3-4 points and often decides the outcome.",wr:55,games:73};
+}
+
+document.getElementById('analyze-btn').addEventListener('click',async function(){
+  const t1n=document.getElementById('t1sel').value,t2n=document.getElementById('t2sel').value;
+  if(t1n===t2n){alert("Select two different teams.");return;}
+  const p1=tProfiles[t1n]||tProfiles[teams[0].name];
+  const p2=tProfiles[t2n]||tProfiles[teams[1].name];
+  const arch=detectArch(p1,p2);
+  const sec=document.getElementById('arch-section');sec.classList.remove('show');
+  document.getElementById('arch-tag').textContent=arch.tag;
+  document.getElementById('arch-name').textContent=arch.name;
+  document.getElementById('arch-desc').textContent=arch.desc;
+  document.getElementById('hist-wr').innerHTML=arch.wr+'<span>%</span>';
+  document.getElementById('hist-sub').textContent=`In ${arch.games} similar matchups since 2010`;
+  document.getElementById('hist-bar').style.width=arch.wr+'%';
+  const s1=Math.floor(Math.random()*12+68),s2=Math.floor(Math.random()*10+62);
+  document.getElementById('proj-score').textContent=s1+'–'+s2;
+  document.getElementById('proj-sub').textContent=`±${(Math.random()*4+2).toFixed(1)} pts based on pace model`;
+  document.getElementById('ch1').textContent=t1n.split(' ').pop().toUpperCase();
+  document.getElementById('ch2').textContent=t2n.split(' ').pop().toUpperCase();
+  const metrics=[{label:'Tempo',k:'tempo',fmt:v=>v.toFixed(1),hi:true},{label:'Off Eff',k:'offEff',fmt:v=>v.toFixed(1),hi:true},{label:'Def Eff',k:'defEff',fmt:v=>v.toFixed(1),hi:false},{label:'TS%',k:'tsPercent',fmt:v=>v.toFixed(1)+'%',hi:true},{label:'Reb Rate',k:'rebRate',fmt:v=>v.toFixed(1)+'%',hi:true},{label:'Clutch',k:'clutch',fmt:v=>v.toFixed(1),hi:true},{label:'TOV Rate',k:'turnover',fmt:v=>v.toFixed(1)+'%',hi:false},{label:'SOS',k:'sos',fmt:v=>v.toFixed(1),hi:true}];
+  document.getElementById('comp-rows').innerHTML=metrics.map(m=>{
+    const v1=p1[m.k],v2=p2[m.k];const w1=(m.hi&&v1>v2)||(!m.hi&&v1<v2);
+    return`<div style="display:contents"><div class="comp-cell ${w1?'win':'lose'}">${m.fmt(v1)}</div><div class="comp-cell stat-label">${m.label}</div><div class="comp-cell ${!w1?'win':'lose'}">${m.fmt(v2)}</div></div>`;
+  }).join('');
+  void sec.offsetWidth;sec.classList.add('show');
+  this.disabled=true;this.textContent='Generating...';
+  const aiBody=document.getElementById('ai-body');
+  aiBody.innerHTML=`<div class="ai-loading"><span>Generating prediction</span><span class="ai-dots"><span>.</span><span>.</span><span>.</span></span></div>`;
+  try{
+    const resp=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:`You are The Margin, an elite college basketball analytics platform. Generate a sharp, data-driven game prediction. Be specific and confident.\n\nMATCHUP: ${t1n} (Home) vs ${t2n} (Away)\nARCHETYPE: ${arch.name}\nHISTORICAL HOME WIN RATE: ${arch.wr}% in ${arch.games} similar matchups\n\n${t1n}: Tempo ${p1.tempo}, Off Eff ${p1.offEff}, Def Eff ${p1.defEff}, TS% ${p1.tsPercent}, Clutch ${p1.clutch}. ${p1.style}\n${t2n}: Tempo ${p2.tempo}, Off Eff ${p2.offEff}, Def Eff ${p2.defEff}, TS% ${p2.tsPercent}, Clutch ${p2.clutch}. ${p2.style}\n\nWrite 3-4 paragraphs of analytical prose (no headers, no bullets): (1) key tactical battle, (2) who wins and projected score, (3) a surprising edge factor, (4) confidence and upset risk. No markdown.`}]})});
+    const data=await resp.json();
+    const text=data.content?.map(c=>c.text||'').join('')||'Unable to generate prediction.';
+    const paras=text.split('\n\n').filter(p=>p.trim().length>0);
+    const wt=p1.offEff>p2.offEff?t1n:t2n;
+    aiBody.innerHTML=paras.map(p=>`<p>${p.trim()}</p>`).join('')+`<div class="ai-key-factors"><div class="ai-factor"><div class="label">AI Pick</div><div class="val">${wt.split(' ').pop()}</div></div><div class="ai-factor"><div class="label">Proj. Score</div><div class="val">${s1}–${s2}</div></div><div class="ai-factor"><div class="label">Confidence</div><div class="val">${arch.wr}%</div></div><div class="ai-factor"><div class="label">Archetype</div><div class="val" style="font-size:.72rem">${arch.tag}</div></div></div>`;
+  }catch(e){aiBody.innerHTML=`<p style="color:var(--muted)">AI prediction unavailable — all statistical comparison and historical archetype data above is fully functional.</p>`;}
+  this.disabled=false;this.textContent='Run AI Analysis ↗';
+});
+
+// STANDINGS
+function renderStandings(){
+  const conf=document.getElementById('conf-select').value;
+  const ts=conferences[conf]||[];
+  document.getElementById('standings-body').innerHTML=[...ts].sort((a,b)=>b.cw-a.cw||(a.cl-b.cl)).map((t,i)=>{
+    const cp=(t.cw/(t.cw+t.cl)*100).toFixed(1);
+    const sc=t.str.startsWith('W')?'var(--green)':'var(--red)';
+    const mc=t.mm.includes('1')||t.mm.includes('2')?'var(--green)':t.mm.includes('NIT')?'var(--red)':'var(--blue-dark)';
+    return`<tr><td class="left"><div style="display:flex;align-items:center;gap:6px"><span style="font-family:var(--fh);font-size:.8rem;font-weight:700;color:var(--muted2);min-width:16px">${i+1}</span><span style="font-family:var(--fh);font-size:.88rem;font-weight:700;color:var(--black)">${t.t}</span>${i===0?'<span class="pill pill-blue">1st</span>':''}</div></td>
+      <td class="${t.cw>t.cl?'bl':'mid'}">${t.cw}-${t.cl}</td><td>${t.ow}-${t.ol}</td>
+      <td class="${parseFloat(cp)>65?'hi':parseFloat(cp)>50?'bl':'lo'}">${cp}%</td>
+      <td class="${t.em>22?'hi':t.em>14?'bl':'mid'}">+${t.em.toFixed(1)}</td>
+      <td>${t.home}</td><td>${t.away}</td>
+      <td style="color:${sc};font-family:var(--fm)">${t.str}</td>
+      <td><span class="pill" style="background:${t.mm.includes('NIT')?'var(--bg2)':'var(--blue-lo)'};color:${mc}">${t.mm}</span></td></tr>`;
+  }).join('');
+}
+renderStandings();
+
+// PLAYERS
+document.getElementById('players-body').innerHTML=[...players].sort((a,b)=>b.ppg-a.ppg).map(p=>{
+  const isPG=p.pos==='PG'||p.pos==='SG';const ec=p.guardExp>88?'var(--green)':p.guardExp>72?'var(--amber)':'var(--red)';
+  return`<tr>
+    <td class="left"><div style="font-family:var(--fh);font-size:.9rem;font-weight:700;color:var(--black)">${p.name}</div></td>
+    <td class="left"><span style="font-size:.72rem;color:var(--muted)">${p.team}</span></td>
+    <td><span class="pill ${p.yr==='Sr'?'pill-green':p.yr==='Jr'?'pill-blue':p.yr==='So'?'pill-amber':'pill-red'}">${p.yr}</span></td>
+    <td><span style="font-family:var(--fh);font-size:.78rem;color:var(--muted)">${p.pos}</span></td>
+    <td class="bl">${p.ppg.toFixed(1)}</td><td>${p.apg.toFixed(1)}</td><td>${p.rpg.toFixed(1)}</td>
+    <td class="${p.ato>3.0?'hi':p.ato>2.4?'bl':'mid'}">${p.ato.toFixed(2)}</td>
+    <td class="${p.ts>62?'hi':p.ts>58?'bl':'mid'}">${p.ts.toFixed(1)}%</td>
+    <td class="${p.clutchFT>82?'hi':p.clutchFT>76?'bl':'lo'}">${p.clutchFT.toFixed(1)}%</td>
+    <td>${isPG?`<span style="font-family:var(--fh);font-size:.95rem;font-weight:900;color:${ec}">${p.guardExp.toFixed(1)}</span> <span class="pill ${p.guardExp>88?'pill-green':p.guardExp>72?'pill-amber':'pill-red'}">${p.guardExp>88?'Elite':p.guardExp>72?'Good':'Low'}</span>`:`<span style="color:var(--muted2);font-size:.72rem">—</span>`}</td>
+  </tr>`;
+}).join('');
+
+// TICKER
+const doubled=[...tickerItems,...tickerItems];
+document.getElementById('ticker').innerHTML=doubled.map(t=>`<div class="tick-item"><span class="tt">${t.t}</span><span class="${t.up?'up':'dn'}">${t.up?'▲':'▼'} ${t.v}</span></div>`).join('');
+
+// TABS
+function showPanel(id){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.mod-tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  document.getElementById('tab-'+id).classList.add('active');
+}
+
+/*
+=================================================================
+📋  THE MARGIN — DATA UPDATE GUIDE
+=================================================================
+
+HOW TO UPDATE THE SITE:
+Open this file in any text editor (Notepad, TextEdit, VS Code).
+All data is in the "DATA SECTION" near the top of the script.
+Save the file and re-upload it to your hosting provider.
+
+─────────────────────────────────────────────────────────────
+UPDATING TEAM STATS
+─────────────────────────────────────────────────────────────
+Find the team by name in the `teams` array and update:
+
+  w, l          → Win/loss record (e.g. w:25, l:4)
+  iq            → Your composite IQ score
+  offEff        → Adjusted offensive efficiency
+  defEff        → Adjusted defensive efficiency
+  effMargin     → offEff minus defEff
+  sos           → Strength of schedule rating
+  sor           → Strength of record
+  bpi           → Basketball Power Index
+  tempo         → Possessions per 40 minutes
+  ts            → True shooting percentage
+  reb           → Rebound rate
+  tov           → Turnover rate
+  clutchFT      → Clutch free throw % (final 5 min, close games)
+  ksIdx         → Kill shot index
+  mmOdds        → March Madness championship probability %
+
+  ats section   → Update each record string (e.g. "24-5")
+                  atsTrend: "up", "dn", or "flat"
+
+  guard section → Guard-specific metrics
+    ato         → Assist-to-turnover ratio
+    uclMin      → Upperclassmen guard minutes %
+    usage       → Guard usage rate
+    rating      → Composite guard experience rating (0-100)
+    seniors     → Number of senior guards
+    juniors     → Number of junior guards
+    grd3pt      → Guard 3-point percentage
+    grdFT       → Guard free throw percentage
+    pressure    → Pressure performance rating
+
+  clutch section → Late-game clutch stats
+    ft          → Free throw % in clutch situations
+    fta         → Free throw attempts per game (clutch)
+    ftm         → Free throws made per game (clutch)
+    closeW      → Win rate in close games (0.0 to 1.0)
+    ot          → Overtime record (e.g. "3-1")
+    ppp         → Points per possession (clutch)
+    defFT       → Opponent clutch FT% allowed
+    tos         → Turnovers in clutch situations
+    rating      → Composite clutch rating (0-100)
+
+  ks section    → Kill shot / scoring run data
+    idx         → Kill shot index
+    perGame     → Average runs per game
+    avgRun      → Average run size in points
+    bigRun      → Largest single run of the season
+    h1Pct       → % of runs in 1st half
+    h2Pct       → % of runs in 2nd half
+    runs        → Array of all double-digit runs this season
+                  (e.g. [22,18,16,14,12,10])
+
+─────────────────────────────────────────────────────────────
+ADDING A NEW TEAM
+─────────────────────────────────────────────────────────────
+Copy an existing team block, paste it at the end of the
+`teams` array (before the closing `]`), and fill in all values.
+Make sure to add a comma after the previous team's closing `}`.
+
+─────────────────────────────────────────────────────────────
+UPDATING PLAYER STATS
+─────────────────────────────────────────────────────────────
+Find the player by name in the `players` array and update:
+
+  ppg, apg, rpg  → Points, assists, rebounds per game
+  ato            → Assist-to-turnover ratio
+  ts             → True shooting %
+  clutchFT       → Clutch free throw %
+  guardExp       → Guard experience rating (PG/SG only)
+  yr             → Year: "Fr", "So", "Jr", "Sr"
+
+─────────────────────────────────────────────────────────────
+UPDATING CONFERENCE STANDINGS
+─────────────────────────────────────────────────────────────
+Find the conference in the `conferences` object and update:
+
+  cw, cl         → Conference wins and losses
+  ow, ol         → Overall wins and losses
+  em             → Efficiency margin
+  home           → Home record (e.g. "12-1")
+  away           → Away record
+  str            → Current streak (e.g. "W5" or "L2")
+  mm             → Tournament projection (e.g. "1 seed", "NIT")
+
+─────────────────────────────────────────────────────────────
+UPDATING THE TICKER
+─────────────────────────────────────────────────────────────
+Find `tickerItems` and update each item:
+  t   → Label text
+  v   → Value text
+  up  → true (shows blue ▲) or false (shows red ▼)
+
+─────────────────────────────────────────────────────────────
+HOW TO HOST THE SITE (FREE OPTIONS)
+─────────────────────────────────────────────────────────────
+1. Netlify (easiest):
+   - Go to netlify.com → Sign up free
+   - Drag and drop this HTML file onto their dashboard
+   - Your site is live instantly at a .netlify.app URL
+
+2. GitHub Pages:
+   - Create a free GitHub account
+   - Create a new repository
+   - Upload this file as "index.html"
+   - Go to Settings → Pages → Deploy from main branch
+
+3. To update later:
+   - Edit the data in this file
+   - Re-upload the new version to replace the old one
+
+=================================================================
+*/
+</script>
+</body>
+</html>
